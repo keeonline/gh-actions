@@ -13,7 +13,7 @@ jobs:
 
             - name: Test
               id: test
-              uses: ./artifact-version
+              uses: ./actions/artifact-version
 
             - name: Show
               run: |
