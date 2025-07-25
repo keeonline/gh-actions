@@ -13,8 +13,8 @@ jobs:
 
             - name: Test
               id: test
-              uses: artifact-version
-              
+              uses: ./artifact-version
+
             - name: Show
               run: |
                 echo "branch=${{steps.test.outputs.branch}}"
