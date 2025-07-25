@@ -1,5 +1,5 @@
 name: Get the branch and release artifact versions
-input:
+inputs:
   github_ref:
     type: string
     required: false
