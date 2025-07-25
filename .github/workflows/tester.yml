@@ -10,10 +10,12 @@ jobs:
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
+
             - name: Test
               id: test
               uses: artifact-version
+              
             - name: Show
               run: |
                 echo "branch=${{steps.test.outputs.branch}}"
-                echo "release=${{steps.test.output.release}}"
+                echo "release=${{steps.test.outputs.release}}"
