@@ -1,0 +1,36 @@
+name: Get the branch and release artifact versions
+inputs:
+  github_ref:
+    type: string
+    required: false
+    default: ${{github.ref}}
+outputs:
+  branch:
+    value: ${{steps.branch.outputs.version_tag}}
+  release:
+    value: ${{steps.semantic.outputs.version_tag}}
+
+run:
+  using: composite
+  steps:
+    - name: Show inputs
+      shell: bash
+      run: |
+        echo "github_ref=${{inputs.github_ref}}"
+
+    - name: Checkout sources
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get the semantic version values for the repo
+      id: semantic
+      uses: paulhatch/semantic-versions@v5.4.0
+
+    - name: Set the branch semantic version value
+      id: branch
+      if: ${{startsWith(inputs.github_ref,'refs/head')}}
+      shell: bash
+      run: |
+        REF=${{inputs.github_ref}}
+        echo "version_tag=${{steps.semantic.outputs.version_tag}}-${{REF#refs/heads/}}-latest" >> $GITHUB_OUTPUT
