@@ -1,0 +1,12 @@
+name: Demo artifact-version
+
+on: 
+    workflow_dispatch:
+
+jobs:
+    greetings:
+        name: Execute demo
+        runs-on: ubuntu-24.04
+        steps:
+            - name: Checkout sources to make local actions available
+              uses: actions/checkout@v4
