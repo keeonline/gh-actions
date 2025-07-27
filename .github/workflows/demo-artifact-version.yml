@@ -10,3 +10,14 @@ jobs:
         steps:
             - name: Checkout sources to make local actions available
               uses: actions/checkout@v4
+
+            - name: Get versions for selected reference
+              id: version
+              uses: ./actions/artifact-version
+
+            - name: Output values
+              run: |
+                echo "branch=${{steps.version.outputs.branch}}"
+                echo "release=${{steps.version.outputs.release}}"
+                echo "projected_release=${{steps.version.outputs.projected_release}}"
+                
