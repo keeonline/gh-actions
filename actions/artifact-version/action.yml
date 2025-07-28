@@ -35,4 +35,4 @@ runs:
       shell: bash
       run: |
         REF=${{inputs.github_ref}}
-        echo "version_tag=${{steps.semantic.outputs.version_tag}}-${REF#refs/heads/}-latest" >> GITHUB_OUTPUT
+        echo "version_tag=${{steps.semantic.outputs.version_tag}}-${REF#refs/heads/}-latest" >> $GITHUB_OUTPUT
