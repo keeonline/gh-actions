@@ -1,8 +1,9 @@
 name: Get artifact version
-input:
-  type: string
-  required: false
-  default: ${{github.ref}}
+inputs:
+  github_ref:
+    type: string
+    required: false
+    default: ${{github.ref}}
 outputs:
   branch:
     value: ${{steps.branch.outputs.version_tag}}
