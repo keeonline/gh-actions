@@ -1,0 +1,47 @@
+name: Build application using Gradle
+inputs:
+  java_distribution:
+    type: string
+    required: false
+    default: temurin
+  java_version:
+    type: string
+    required: false
+    default: 21
+  artifact_version:
+    type: string
+    required: false
+    default: 0.0.1-SNAPSHOT
+
+runs:
+  using: composite
+  steps:
+    - name: Show inputs
+      shell: bash
+      run: |
+        echo "java_distribution=${{inputs.java_distribution}}"
+        echo "java_version=${{inputs.java_version}}"
+        echo "artifact_version=${{inputs.artifact_version}}"
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{inputs.java_distribution}}
+        java-version: ${{inputs.java_version}}
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Build application with Gradle
+      run: |
+        ./gradlew -Pversion=${{inputs.artifact_version}} build --no-daemon
+
+    - name: Show builds outputs
+      run: |
+        ls -lsa build/libs
+
+    - name: Upload build reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build Reports
+        path: build/reports
