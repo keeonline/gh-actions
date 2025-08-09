@@ -27,9 +27,9 @@ runs:
     - name: List image
       shell: bash
       run: |
-        docker image ls {{inputs.image}}:${{inputs.artifact_version}}
+        docker image ls ${{inputs.image}}:${{inputs.artifact_version}}
 
     - name: Inspect image
       shell: bash
       run: |
-        docker inspect --type=image {{inputs.image}}:${{inputs.artifact_version}}
+        docker inspect --type=image ${{inputs.image}}:${{inputs.artifact_version}}
