@@ -11,8 +11,7 @@ inputs:
     required: true
   target_image:
     type: string
-    required: false
-    default: ${{inputs.source_image}}
+    required: true
 
 runs:
   using: composite
