@@ -15,7 +15,7 @@ runs:
       shell: bash
       run: |
         echo "image=${{inputs.image}}"
-        echo "image=${{inputs.artifact_version}}"
+        echo "artifact_version=${{inputs.artifact_version}}"
 
     - name: Build image
       shell: bash
