@@ -24,11 +24,13 @@ runs:
         echo "reports_upload_title=${{inputs.reports_upload_title}}"
 
     - name: Setup karate
+      shell: bash
       run: |
         wget -O /opt/karate.jar https://github.com/karatelabs/karate/releases/download/v${{inputs.karate_version}}/karate-${{inputs.karate_version}}.jar
 
     - name: Execute tests
       working-directory: ${{inputs.tests_directory}}
+      shell: bash
       run: |
         java -jar /opt/karate.jar .
 
