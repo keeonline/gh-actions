@@ -1,4 +1,4 @@
-name: Build application using Gradle
+name: Build a Java application
 inputs:
   artifact_version:
     type: string
