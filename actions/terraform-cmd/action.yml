@@ -50,7 +50,7 @@ runs:
           -backend-config="use_lockfile=true"
 
     - name: Conditionally set the planning mode to destroy
-      if : ${{contains(input.action,'destroy')}}
+      if : ${{contains(inputs.action,'destroy')}}
       id: planmode
       shell: bash
       run: echo "value=destroy" >> $GITHUB_OUTPUT
@@ -58,10 +58,10 @@ runs:
     - name: Terraform plan 
       working-directory: ${{inputs.tfdir}}
       run: |
-        terraform plan -input=false ${{steps.planmode.output.value}}      
+        terraform plan -input=false ${{steps.planmode.outputs.value}}      
 
     - name: Terraform state change
       if: ${{!endsWith(inputs.action,'-plan')}}
       working-directory: ${{inputs.tfdir}}
       run: |
-        terraform apply -auto-approve -input=false ${{steps.planmode.output.value}}      
+        terraform apply -auto-approve -input=false ${{steps.planmode.outputs.value}}      
