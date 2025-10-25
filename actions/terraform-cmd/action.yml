@@ -1,0 +1,70 @@
+name: Execute Terraform Command
+inputs:
+  aws_account_id:
+    type: string
+    required: true
+  aws_region:
+    type: string
+    required: true
+  action:
+    type: string
+    required: false
+    default: apply-plan
+  environment:
+    type: string
+    required: true
+  tfdir:
+    type: string
+    required: false
+    default: terraform
+
+
+runs:
+  using: composite
+  steps:
+    - name: Show inputs
+      shell: bash
+      run: |
+        echo "aws_account_id=${{inputs.aws_account_id}}"
+        echo "aws_region=${{inputs.aws_region}}"
+        echo "action=${{inputs.action}}"
+        echo "environment=${{inputs.environment}}"
+        echo "tfdir=${{inputs.tfdir}}"
+
+    - name: Configure credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{inputs.aws_account_id}}:role/IaC
+        aws-region: ${{inputs.aws_region}}
+
+    - name: Install Terraform on runner
+      uses: hashicorp/setup-terraform@v3.1.2
+
+    - name: Terraform init
+      shell: bash
+      working-directory: ${{inputs.tfdir}}
+      run: |
+        terraform init \
+          -backend-config="bucket=tf-state-bucket-${{inputs.aws_account_id}}" \
+          -backend-config="key=${{inputs.environment}}-${{github.event.repository.name}}.tfstate" \
+          -backend-config="region=${{inputs.aws_region}}" \
+          -backend-config="use_lockfile=true"
+
+    - name: Conditionally set the planning mode
+      if: ${{contains(inputs.action,'destroy')}}
+      id: planmode
+      shell: bash
+      run: echo "value=-destroy" >> $GITHUB_OUTPUT
+
+    - name: Terraform plan
+      working-directory: ${{inputs.tfdir}}
+      shell: bash
+      run: |
+        terraform plan -input=false ${{steps.planmode.outputs.value}} 
+
+    - name: Terrform state change
+      if: ${{!endsWith(inputs.action,'-plan')}}
+      working-directory: ${{inputs.tfdir}}
+      shell: bash
+      run: |
+        terraform apply -auto-approve -input=false ${{steps.planmode.outputs.value}} 
