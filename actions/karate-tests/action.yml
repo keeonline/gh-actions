@@ -12,6 +12,10 @@ inputs:
     type: string
     required: false
     default: "Karate Test Reports"
+  baseurl:
+    type: string
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -28,11 +32,19 @@ runs:
       run: |
         wget -O /opt/karate.jar https://github.com/karatelabs/karate/releases/download/v${{inputs.karate_version}}/karate-${{inputs.karate_version}}.jar
 
+    - name: Conditionally setup base URL property
+      if: ${{ inputs.baseurl != '' }}
+      id: baseurl
+      shell: bash
+      run: |
+        BASEURL=${{inputs.baseurl}}
+        echo "value=-Dbaseurl=${BASEURL}" >> $GITHUB_OUTPUT
+
     - name: Execute tests
       working-directory: ${{inputs.tests_directory}}
       shell: bash
       run: |
-        java -jar /opt/karate.jar .
+        java ${{steps.baseurl.outputs.value}} -jar /opt/karate.jar .
 
     - name: Upload test reports
       uses: actions/upload-artifact@v4
