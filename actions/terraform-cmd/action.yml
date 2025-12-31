@@ -17,7 +17,18 @@ inputs:
     type: string
     required: false
     default: terraform
-
+  checkout_repo:
+    type: boolean
+    required: false
+    default: false
+  repo_name:
+    type: string
+    required: false
+    default: ''
+  repo_ref:
+    type: string
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -30,6 +41,17 @@ runs:
         echo "action=${{inputs.action}}"
         echo "environment=${{inputs.environment}}"
         echo "tfdir=${{inputs.tfdir}}"
+        echo "checkout_repo=${{inputs.checkout_repo}}"
+        echo "repo_name=${{inputs.repo_name}}"
+        echo "repo_ref=${{inputs.repo_ref}}"
+
+    - name: Conditionally clone the repository
+      if: ${{ inputs.checkout_repo }}
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.repo_name }}
+        ref: ${{ inputs.repo_ref }}
+        sparse-checkout: ${{ inputs.tfdir }}
 
     - name: Configure credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -40,13 +62,21 @@ runs:
     - name: Install Terraform on runner
       uses: hashicorp/setup-terraform@v3.1.2
 
+    - name: Extract the unqualified repo name
+      id: unqualified_repo_name
+      env:
+        REPO_NAME: ${{ inputs.repo_name }}
+      shell: bash
+      run: |
+        echo "value=${REPO_NAME##*/}" >> $GITHUB_OUTPUT
+
     - name: Terraform init
       shell: bash
       working-directory: ${{inputs.tfdir}}
       run: |
         terraform init \
           -backend-config="bucket=tf-state-bucket-${{inputs.aws_account_id}}" \
-          -backend-config="key=${{inputs.environment}}-${{github.event.repository.name}}.tfstate" \
+          -backend-config="key=${{inputs.environment}}-${{steps.unqualified_repo_name.outputs.value}}.tfstate" \
           -backend-config="region=${{inputs.aws_region}}" \
           -backend-config="use_lockfile=true"
 
