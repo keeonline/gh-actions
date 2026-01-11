@@ -1,14 +1,16 @@
 name: Get artifact version
 inputs:
-  github_ref:
+  repo_ref:
     type: string
     required: false
     default: ${{github.ref}}
+  repo_name:
+    type: string
+    required: false
+    default: ${{github.repository}}
 outputs:
-  branch:
-    value: ${{steps.branch.outputs.version_tag}}
-  release:
-    value: ${{steps.semantic.outputs.version_tag}}
+  value:
+    value: ${{steps.version.outputs.value}}
   projected_release:
     value: ${{steps.semantic.outputs.changed}}
 
@@ -18,21 +20,32 @@ runs:
     - name: Show inputs
       shell: bash
       run: |
-        echo "github_ref=${{inputs.github_ref}}"
+        echo "repo_ref=${{inputs.repo_ref}}"
+        echo "repo_name=${{inputs.repo_name}}"
 
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
+        repository: ${{inputs.repo_name}}
+        ref: ${{inputs.repo_ref}}
         fetch-depth: 0
 
     - name: Get the semantic version values for repo
       id: semantic
       uses: paulhatch/semantic-version@v5.4.0
 
-    - name: Set the branch reference semantic version value
-      id: branch
-      if: ${{startsWith(inputs.github_ref,'refs/heads')}}
+    - name: Set the ouput version value
+      id: version
       shell: bash
       run: |
-        REF=${{inputs.github_ref}}
-        echo "version_tag=${{steps.semantic.outputs.version_tag}}-${REF#refs/heads/}-latest" >> $GITHUB_OUTPUT
+        REF=${{inputs.repo_ref}}
+        TRIMMED_REF=${REF#refs/tags/}
+        if git show-ref --tags --verify --quiet "refs/tags/${TRIMMED_REF}"
+        then
+          echo "value=${{steps.semantic.outputs.version_tag}}" >> $GITHUB_OUTPUT
+        elif [ "REF" == "refs/heads/main" ]
+        then
+          echo "value=${{steps.semantic.outputs.version_tag}}" >> $GITHUB_OUTPUT
+        else
+          echo "value=${{steps.semantic.outputs.version_tag}}-${REF#refs/heads/}-latest" >> $GITHUB_OUTPUT
+        fi

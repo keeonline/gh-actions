@@ -12,22 +12,20 @@ jobs:
         permissions:
           contents: write
         steps:
-            - name: Checkout sources
+            - name: Checkout sources to make local actions available
               uses: actions/checkout@v4
-              with:
-                fetch-depth: 0
 
-            - name: Get the next semantic version for the repo
-              id: next_semantic
-              uses: paulhatch/semantic-version@v5.4.0
+            - name: Get the version value
+              id: version
+              uses: ./actions/artifact-version
 
             - name: Show outputs
               run: | 
-                echo "next_semantic_version=${{steps.next_semantic.outputs.version_tag}}"
+                echo "value=${{steps.version.outputs.value}}"
 
             - name: Tag Repo
               uses: richardsimko/update-tag@v1.1.6
               with:
-                tag_name: ${{steps.next_semantic.outputs.version_tag}}
+                tag_name: ${{steps.version.outputs.value}}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
