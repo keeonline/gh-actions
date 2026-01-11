@@ -43,7 +43,7 @@ runs:
         if git show-ref --tags --verify --quiet "refs/tags/${TRIMMED_REF}"
         then
           echo "value=${{steps.semantic.outputs.version_tag}}" >> $GITHUB_OUTPUT
-        elif [ "REF" == "refs/heads/main" ]
+        elif [ "$REF" == "refs/heads/main" ]
         then
           echo "value=${{steps.semantic.outputs.version_tag}}" >> $GITHUB_OUTPUT
         else
