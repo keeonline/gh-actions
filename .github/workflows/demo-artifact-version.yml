@@ -17,6 +17,6 @@ jobs:
 
             - name: Output values
               run: |
-                echo "value=${{steps.version.outputs.version}}"
+                echo "value=${{steps.version.outputs.value}}"
                 echo "projected_release=${{steps.version.outputs.projected_release}}"
                 
